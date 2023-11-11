@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Clientes</title>
+  <style>
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Cadastro de Clientes</h1>
+
+  <!-- Tela de Incluir Clientes -->
+  <div id="incluirCliente">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" required>
+
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" required>
+
+    <label for="cep">CEP:</label>
+    <input type="text" id="cep" pattern="\d{5}-\d{3}" required>
+
+    <label for="uf">UF:</label>
+    <select id="uf" required>
+      <option value="">Selecione</option>
+      <option value="AC">RO</option>
+      <option value="AL">AC</option>
+      <option value="AC">AM</option>
+      <option value="AL">RR</option>
+      <option value="AC">PA</option>
+      <option value="AL">AP</option>
+      <option value="AC">TO</option>
+      <option value="AL">MA</option>
+      <option value="AC">PI</option>
+      <option value="AL">CE</option>
+      <option value="AC">RN</option>
+      <option value="AL">PB</option>
+      <option value="AL">PE</option>
+      <option value="AL">AL</option>
+      <option value="AL">SE</option>
+      <option value="AL">BA</option>
+      <option value="AL">MG</option>
+      <option value="AL">ES</option>
+      <option value="AL">RJ</option>
+      <option value="AL">SP</option>
+      <option value="AL">PR</option>
+      <option value="AL">SC</option>
+      <option value="AL">RS</option>
+      <option value="AL">MS</option>
+      <option value="AL">MT</option>
+      <option value="AL">GO</option>
+      <option value="AL">DF</option>
+    </select>
+
+    <label for="endereco">Endereço:</label>
+    <input type="text" id="endereco" required>
+
+    <label for="numero">Número:</label>
+    <input type="text" id="numero" required>
+
+    <button onclick="incluirCliente()">Incluir Cliente</button>
+    <button onclick="mostrarListaClientes()">Ver Lista de Clientes</button>
+  </div>
+
+  <!-- Tela de Listar Clientes -->
+  <div id="listarClientes" style="display: none;">
+    <h2>Lista de Clientes</h2>
+    <ul id="listaClientes"></ul>
+
+    <button onclick="voltarParaInclusao()">Voltar para Inclusão</button>
+  </div>
+
+  <script>
+    // Simulação de banco de dados usando localStorage
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+
+    function incluirCliente() {
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const cep = document.getElementById('cep').value;
+      const uf = document.getElementById('uf').value;
+      const endereco = document.getElementById('endereco').value;
+      const numero = document.getElementById('numero').value;
+
+      // Simulação de busca no banco de dados usando API externa (pode ser substituído por uma chamada real)
+      const enderecoCompleto = buscarEndereco(cep, endereco, numero, uf);
+
+      // Validando os campos (pode adicionar mais validações conforme necessário)
+      if (!nome || !email || !cep || !uf || !endereco || !numero || !enderecoCompleto) {
+        alert('Por favor, preencha todos os campos corretamente.');
+        return;
+      }
+
+      const novoCliente = {
+        nome,
+        email,
+        cep,
+        uf,
+        endereco: enderecoCompleto,
+      };
+
+      clientes.push(novoCliente);
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+
+      limparCampos();
+      mostrarListaClientes();
+    }
+
+    function mostrarListaClientes() {
+      const listaClientesDiv = document.getElementById('listarClientes');
+      const incluirClienteDiv = document.getElementById('incluirCliente');
+
+      // Exibir a lista de clientes e ocultar o formulário de inclusão
+      listaClientesDiv.style.display = 'block';
+      incluirClienteDiv.style.display = 'none';
+
+      const listaClientesUl = document.getElementById('listaClientes');
+      listaClientesUl.innerHTML = '';
+
+      // Mostrar os clientes na lista
+      clientes.forEach((cliente, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${cliente.nome} - ${cliente.email} - ${cliente.cep} - ${cliente.uf} - ${cliente.endereco}`;
+
+        const excluirBtn = document.createElement('button');
+        excluirBtn.innerHTML = 'Excluir';
+        excluirBtn.onclick = () => excluirCliente(index);
+
+        const alterarBtn = document.createElement('button');
+        alterarBtn.innerHTML = 'Alterar';
+        alterarBtn.onclick = () => alterarCliente(index);
+
+        li.appendChild(excluirBtn);
+        li.appendChild(alterarBtn);
+
+        listaClientesUl.appendChild(li);
+      });
+    }
+
+    function excluirCliente(index) {
+      clientes.splice(index, 1);
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      mostrarListaClientes();
+    }
+
+    function alterarCliente(index) {
+      const clienteAtualizado = prompt('Digite as informações atualizadas separadas por vírgula (Nome, Email, CEP, UF, Endereço, Número):');
+
+      if (clienteAtualizado) {
+        const [nome, email, cep, uf, endereco, numero] = clienteAtualizado.split(',');
+        clientes[index] = { nome, email, cep, uf, endereco, numero };
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        mostrarListaClientes();
+      }
+    }
+
+    function voltarParaInclusao() {
+      const listaClientesDiv = document.getElementById('listarClientes');
+      const incluirClienteDiv = document.getElementById('incluirCliente');
+
+      // Exibir o formulário de inclusão e ocultar a lista de clientes
+      listaClientesDiv.style.display = 'none';
+      incluirClienteDiv.style.display = 'block';
+    }
+
+    function limparCampos() {
+      document.getElementById('nome').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('cep').value = '';
+      document.getElementById('uf').value = '';
+      document.getElementById('endereco').value = '';
+      document.getElementById('numero').value = '';
+    }
+
+    // Função de simulação para buscar endereço por CEP (pode ser substituída por uma chamada real)
+    function buscarEndereco(cep, endereco, numero, uf) {
+      // Simulação simples - retorna uma string com o endereço completo
+      return `${endereco}, ${numero}, ${cep}, ${uf}`;
+    }
+  </script>
+
+</body>
+</html>
